@@ -130,6 +130,6 @@ MonoBehaviour:
   stripeLength: 1
   scrollSpeed: 2
   swapAxes: 0
-  reverseScroll: 0
+  reverseScroll: 1
   colorA: {r: 0.16, g: 0.17, b: 0.22, a: 1}
   colorB: {r: 0.95, g: 0.7, b: 0.15, a: 1}
