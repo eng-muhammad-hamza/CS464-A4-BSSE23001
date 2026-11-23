@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class SpawnBlocker : MonoBehaviour
 {
-    public bool Covers(Vector3 worldPosition, float clearanceMeters)
+    public bool covers(Vector3 worldPosition, float clearanceMeters)
     {
         Vector3 localPosition = transform.InverseTransformPoint(worldPosition);
         Vector3 worldScale = transform.lossyScale;

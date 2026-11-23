@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public class Health : MonoBehaviour
@@ -5,75 +6,85 @@ public class Health : MonoBehaviour
     [SerializeField] int max = 3;
     [SerializeField] float iFrames = 1f;
 
-    int current;
+    int heartsLeft;
     float invulnerableUntil;
     PlayerJuice juice;
     PlayerController controller;
 
-    public int Current => current;
-    public int Max => max;
-    public bool IsInvulnerable => Time.time < invulnerableUntil;
+    public event Action<int, int> damaged;
+    public event Action<int, int> healed;
+    public event Action<int, int> restored;
+    public event Action died;
+
+    public int current => heartsLeft;
+    public int maxHearts => max;
+    public bool isInvulnerable => Time.time < invulnerableUntil;
 
     void Awake()
     {
-        current = max;
+        heartsLeft = max;
         juice = GetComponent<PlayerJuice>();
         controller = GetComponent<PlayerController>();
     }
 
-    public bool TakeDamage(int amount)
+    public bool takeDamage(int amount)
     {
-        if (amount <= 0 || current <= 0 || IsInvulnerable) return false;
+        if (amount <= 0 || heartsLeft <= 0 || isInvulnerable) return false;
         invulnerableUntil = Time.time + iFrames;
 
-        int previous = current;
-        current = Mathf.Max(0, current - amount);
-        if (GameManager.Instance != null) GameManager.Instance.UpdateUI();
+        int previous = heartsLeft;
+        heartsLeft = Mathf.Max(0, heartsLeft - amount);
+        if (GameManager.instance != null) GameManager.instance.updateUi();
+        damaged?.Invoke(heartsLeft, max);
 
-        if (current > 0)
+        if (heartsLeft > 0)
         {
-            if (juice != null) juice.TookDamage(previous - current);
+            if (juice != null) juice.tookDamage(previous - heartsLeft);
             return true;
         }
-        Die();
+        die();
         return true;
     }
 
-    public void Kill()
+    public void kill()
     {
-        if (current <= 0) return;
-        current = 0;
-        if (GameManager.Instance != null) GameManager.Instance.UpdateUI();
-        Die();
+        if (heartsLeft <= 0) return;
+        heartsLeft = 0;
+        if (GameManager.instance != null) GameManager.instance.updateUi();
+        damaged?.Invoke(heartsLeft, max);
+        die();
     }
 
-    void Die()
+    void die()
     {
         if (controller != null)
         {
-            controller.SetControlsEnabled(false);
-            controller.CancelBoost();
+            controller.setControlsEnabled(false);
+            controller.cancelBoost();
         }
-        if (juice != null) juice.Died();
-        if (GameManager.Instance != null) GameManager.Instance.PlayerDied();
+        if (juice != null) juice.died();
+        died?.Invoke();
+        if (GameManager.instance != null) GameManager.instance.playerDied();
     }
 
-    public bool Heal(int amount)
+    public bool heal(int amount)
     {
-        if (amount <= 0 || current <= 0 || current >= max) return false;
-        int previous = current;
-        current = Mathf.Min(max, current + amount);
-        if (juice != null) juice.Healed(current - previous);
-        if (GameManager.Instance != null) GameManager.Instance.UpdateUI();
+        if (amount <= 0 || heartsLeft <= 0 || heartsLeft >= max) return false;
+        int previous = heartsLeft;
+        heartsLeft = Mathf.Min(max, heartsLeft + amount);
+        if (juice != null) juice.healed(heartsLeft - previous);
+        if (GameManager.instance != null) GameManager.instance.updateUi();
+        healed?.Invoke(heartsLeft, max);
         return true;
     }
 
-    public void Restore(float protectionSeconds)
+    public void restore(float protectionSeconds)
     {
-        current = max;
+        heartsLeft = max;
         invulnerableUntil = Time.time + protectionSeconds;
-        if (controller != null) controller.SetControlsEnabled(true);
-        if (juice != null) juice.Respawned();
-        if (GameManager.Instance != null) GameManager.Instance.UpdateUI();
+        if (controller != null) controller.setControlsEnabled(true);
+        if (juice != null) juice.respawned();
+        if (GameManager.instance != null) GameManager.instance.updateUi();
+        restored?.Invoke(heartsLeft, max);
     }
 }

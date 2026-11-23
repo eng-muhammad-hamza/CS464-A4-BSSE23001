@@ -10,19 +10,19 @@ public class Goal : MonoBehaviour
     {
         if (Time.time < nextPulse) return;
         nextPulse = Time.time + pulseInterval;
-        bool open = GameManager.Instance != null && GameManager.Instance.GoalOpen;
-        JuiceFx.Ring(transform.position + Vector3.up * 0.1f, open ? JuiceFx.PositiveColor : JuiceFx.DamageColor, 2.2f, 0.9f);
+        bool open = GameManager.instance != null && GameManager.instance.goalOpen;
+        JuiceFx.ring(transform.position + Vector3.up * 0.1f, open ? JuiceFx.positiveColor : JuiceFx.damageColor, 2.2f, 0.9f);
     }
 
     void OnTriggerEnter(Collider other)
     {
         if (reached || !other.CompareTag("Player")) return;
-        if (GameManager.Instance != null && GameManager.Instance.ReachGoal()) reached = true;
+        if (GameManager.instance != null && GameManager.instance.reachGoal()) reached = true;
     }
 
     void OnTriggerStay(Collider other)
     {
         if (reached || !other.CompareTag("Player")) return;
-        if (GameManager.Instance != null && GameManager.Instance.GoalOpen && GameManager.Instance.ReachGoal()) reached = true;
+        if (GameManager.instance != null && GameManager.instance.goalOpen && GameManager.instance.reachGoal()) reached = true;
     }
 }

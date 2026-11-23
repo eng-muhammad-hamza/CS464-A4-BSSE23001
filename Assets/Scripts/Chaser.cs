@@ -23,9 +23,9 @@ public class Chaser : MonoBehaviour
     [SerializeField] GameObject visual;
     [SerializeField] Renderer bodyRenderer;
 
-    static readonly Color BaseColor = new Color(0.7f, 0.3f, 0.9f);
-    static readonly Color TelegraphColor = new Color(1f, 0.92f, 0.3f);
-    static readonly Color RecoverColor = new Color(0.45f, 0.25f, 0.55f);
+    static readonly Color baseColor = new Color(0.7f, 0.3f, 0.9f);
+    static readonly Color telegraphColor = new Color(1f, 0.92f, 0.3f);
+    static readonly Color recoverColor = new Color(0.45f, 0.25f, 0.55f);
 
     Collider triggerCollider;
     Hazard hazard;
@@ -59,23 +59,23 @@ public class Chaser : MonoBehaviour
     void Update()
     {
         if (player == null || playerHealth == null) return;
-        if (GameManager.Instance != null && GameManager.Instance.IsFinished) return;
+        if (GameManager.instance != null && GameManager.instance.isFinished) return;
 
         if (state == State.Dormant)
         {
-            float elapsed = GameManager.Instance != null ? GameManager.Instance.Elapsed : Time.timeSinceLevelLoad;
-            if (elapsed >= activateAtSeconds) EnterState(State.Appear);
+            float elapsed = GameManager.instance != null ? GameManager.instance.elapsed : Time.timeSinceLevelLoad;
+            if (elapsed >= activateAtSeconds) enterState(State.Appear);
             return;
         }
 
         if (state == State.Appear)
         {
             visual.SetActive(Mathf.FloorToInt(Time.time * 12f) % 2 == 0);
-            if (Time.time >= stateEndTime) EnterState(State.Chase);
+            if (Time.time >= stateEndTime) enterState(State.Chase);
             return;
         }
 
-        if (playerHealth.Current <= 0) return;
+        if (playerHealth.current <= 0) return;
 
         Vector3 toPlayer = player.position - transform.position;
         toPlayer.y = 0f;
@@ -85,26 +85,26 @@ public class Chaser : MonoBehaviour
         switch (state)
         {
             case State.Chase:
-                Move(direction, chaseSpeed);
-                Face(direction);
-                if (distance < lungeRange) EnterState(State.Telegraph);
+                move(direction, chaseSpeed);
+                face(direction);
+                if (distance < lungeRange) enterState(State.Telegraph);
                 break;
             case State.Telegraph:
-                Face(direction);
-                bodyMaterial.color = Mathf.FloorToInt(Time.time * 16f) % 2 == 0 ? TelegraphColor : BaseColor;
+                face(direction);
+                bodyMaterial.color = Mathf.FloorToInt(Time.time * 16f) % 2 == 0 ? telegraphColor : baseColor;
                 if (Time.time >= stateEndTime)
                 {
                     lungeDirection = direction;
-                    EnterState(State.Lunge);
+                    enterState(State.Lunge);
                 }
                 break;
             case State.Lunge:
-                Move(lungeDirection, lungeSpeed);
-                if (Time.time >= stateEndTime) EnterState(State.Recover);
+                move(lungeDirection, lungeSpeed);
+                if (Time.time >= stateEndTime) enterState(State.Recover);
                 break;
             case State.Recover:
-                Move(-direction, chaseSpeed * 0.6f);
-                if (Time.time >= stateEndTime) EnterState(State.Chase);
+                move(-direction, chaseSpeed * 0.6f);
+                if (Time.time >= stateEndTime) enterState(State.Chase);
                 break;
         }
 
@@ -113,7 +113,7 @@ public class Chaser : MonoBehaviour
         transform.position = position;
     }
 
-    void EnterState(State next)
+    void enterState(State next)
     {
         state = next;
         switch (next)
@@ -122,30 +122,30 @@ public class Chaser : MonoBehaviour
                 transform.position = new Vector3(transform.position.x, hoverHeight, transform.position.z);
                 visual.SetActive(true);
                 stateEndTime = Time.time + appearSeconds;
-                JuiceFx.Ring(transform.position, BaseColor, 3f, appearSeconds);
-                JuiceFx.FloatingText(transform.position + Vector3.up * 1.2f, "!", JuiceFx.DamageColor, 22f);
+                JuiceFx.ring(transform.position, baseColor, 3f, appearSeconds);
+                JuiceFx.floatingText(transform.position + Vector3.up * 1.2f, "!", JuiceFx.damageColor, 22f);
                 break;
             case State.Chase:
                 visual.SetActive(true);
                 triggerCollider.enabled = true;
                 hazard.enabled = true;
-                bodyMaterial.color = BaseColor;
+                bodyMaterial.color = baseColor;
                 break;
             case State.Telegraph:
                 stateEndTime = Time.time + telegraphSeconds;
                 break;
             case State.Lunge:
                 stateEndTime = Time.time + lungeSeconds;
-                bodyMaterial.color = JuiceFx.DamageColor;
+                bodyMaterial.color = JuiceFx.damageColor;
                 break;
             case State.Recover:
                 stateEndTime = Time.time + recoverSeconds;
-                bodyMaterial.color = RecoverColor;
+                bodyMaterial.color = recoverColor;
                 break;
         }
     }
 
-    void Move(Vector3 direction, float speed)
+    void move(Vector3 direction, float speed)
     {
         Vector3 position = transform.position + direction * (speed * Time.deltaTime);
         position.x = Mathf.Clamp(position.x, minXZ.x, maxXZ.x);
@@ -153,7 +153,7 @@ public class Chaser : MonoBehaviour
         transform.position = position;
     }
 
-    void Face(Vector3 direction)
+    void face(Vector3 direction)
     {
         if (direction.sqrMagnitude < 0.001f) return;
         transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.LookRotation(direction), 540f * Time.deltaTime);

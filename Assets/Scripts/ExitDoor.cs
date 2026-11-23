@@ -12,21 +12,21 @@ public class ExitDoor : MonoBehaviour
 
     void Start()
     {
-        if (gateRenderer != null) gateRenderer.material.color = JuiceFx.DamageColor;
+        if (gateRenderer != null) gateRenderer.material.color = JuiceFx.damageColor;
     }
 
     void Update()
     {
-        if (opened || GameManager.Instance == null || !GameManager.Instance.ExitUnlocked) return;
+        if (opened || GameManager.instance == null || !GameManager.instance.exitUnlocked) return;
         opened = true;
-        StartCoroutine(Open());
+        StartCoroutine(openDoorRoutine());
     }
 
-    IEnumerator Open()
+    IEnumerator openDoorRoutine()
     {
         if (gateCollider != null) gateCollider.enabled = false;
-        if (gateRenderer != null) gateRenderer.material.color = JuiceFx.PositiveColor;
-        JuiceFx.Ring(transform.position + Vector3.up * 0.1f, JuiceFx.PositiveColor, 3f, 0.6f);
+        if (gateRenderer != null) gateRenderer.material.color = JuiceFx.positiveColor;
+        JuiceFx.ring(transform.position + Vector3.up * 0.1f, JuiceFx.positiveColor, 3f, 0.6f);
 
         Vector3 from = gate.position;
         Vector3 to = from + Vector3.down * sinkDistance;

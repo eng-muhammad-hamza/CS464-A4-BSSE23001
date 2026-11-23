@@ -23,7 +23,7 @@ public class Hazard : MonoBehaviour
     [SerializeField] float shakeSeconds = 0.3f;
     [SerializeField] float shakeMagnitude = 0.3f;
 
-    public bool IsResting { get; private set; }
+    public bool isResting { get; private set; }
 
     IEnumerator Start()
     {
@@ -35,7 +35,7 @@ public class Hazard : MonoBehaviour
             yield break;
         }
 
-        SetPistonLocalHeight(pistonRaisedLocalY);
+        setPistonLocalHeight(pistonRaisedLocalY);
         zone.enabled = false;
         warning.SetActive(false);
         if (startDelay > 0f) yield return new WaitForSeconds(startDelay);
@@ -43,34 +43,34 @@ public class Hazard : MonoBehaviour
         while (true)
         {
             zone.enabled = false;
-            IsResting = true;
+            isResting = true;
             yield return new WaitForSeconds(restTime);
-            IsResting = false;
+            isResting = false;
 
             warning.SetActive(true);
             yield return new WaitForSeconds(warnTime);
             warning.SetActive(false);
 
             zone.enabled = true;
-            yield return MovePistonHeight(pistonRaisedLocalY, pistonSlammedLocalY, slamSeconds, EaseInQuadratic);
-            if (CameraShake.Instance != null) CameraShake.Instance.Shake(shakeSeconds, shakeMagnitude);
+            yield return movePistonHeight(pistonRaisedLocalY, pistonSlammedLocalY, slamSeconds, easeInQuadratic);
+            if (CameraShake.instance != null) CameraShake.instance.shake(shakeSeconds, shakeMagnitude);
             Vector3 impactPoint = new Vector3(transform.position.x, transform.position.y + 0.15f, transform.position.z);
-            JuiceFx.Burst(impactPoint, new Color(0.8f, 0.75f, 0.7f), 36, 5f, 0.3f, 0.7f, false, 0.3f);
-            JuiceFx.Ring(impactPoint, JuiceFx.DamageColor, 5f, 0.45f);
+            JuiceFx.burst(impactPoint, new Color(0.8f, 0.75f, 0.7f), 36, 5f, 0.3f, 0.7f, false, 0.3f);
+            JuiceFx.ring(impactPoint, JuiceFx.damageColor, 5f, 0.45f);
             float holdSeconds = piston == null ? strikeTime : Mathf.Max(0f, strikeTime - slamSeconds);
             yield return new WaitForSeconds(holdSeconds);
 
             zone.enabled = false;
-            yield return MovePistonHeight(pistonSlammedLocalY, pistonRaisedLocalY, riseSeconds, EaseOutQuadratic);
+            yield return movePistonHeight(pistonSlammedLocalY, pistonRaisedLocalY, riseSeconds, easeOutQuadratic);
         }
     }
 
-    IEnumerator MovePistonHeight(float fromLocalY, float toLocalY, float durationSeconds, System.Func<float, float> easing)
+    IEnumerator movePistonHeight(float fromLocalY, float toLocalY, float durationSeconds, System.Func<float, float> easing)
     {
         if (piston == null) yield break;
         if (durationSeconds <= 0f)
         {
-            SetPistonLocalHeight(toLocalY);
+            setPistonLocalHeight(toLocalY);
             yield break;
         }
         float elapsedSeconds = 0f;
@@ -78,13 +78,13 @@ public class Hazard : MonoBehaviour
         {
             elapsedSeconds += Time.deltaTime;
             float progress = easing(Mathf.Clamp01(elapsedSeconds / durationSeconds));
-            SetPistonLocalHeight(Mathf.Lerp(fromLocalY, toLocalY, progress));
+            setPistonLocalHeight(Mathf.Lerp(fromLocalY, toLocalY, progress));
             yield return null;
         }
-        SetPistonLocalHeight(toLocalY);
+        setPistonLocalHeight(toLocalY);
     }
 
-    void SetPistonLocalHeight(float localY)
+    void setPistonLocalHeight(float localY)
     {
         if (piston == null) return;
         Vector3 localPosition = piston.localPosition;
@@ -92,15 +92,15 @@ public class Hazard : MonoBehaviour
         piston.localPosition = localPosition;
     }
 
-    static float EaseInQuadratic(float progress) => progress * progress;
-    static float EaseOutQuadratic(float progress) => 1f - (1f - progress) * (1f - progress);
+    static float easeInQuadratic(float progress) => progress * progress;
+    static float easeOutQuadratic(float progress) => 1f - (1f - progress) * (1f - progress);
 
     void OnTriggerStay(Collider other)
     {
         if (!enabled) return;
         Health health = other.GetComponentInParent<Health>();
         if (health == null) return;
-        if (!health.TakeDamage(damage)) return;
+        if (!health.takeDamage(damage)) return;
 
         Rigidbody body = other.attachedRigidbody;
         if (body == null) return;
@@ -109,7 +109,7 @@ public class Hazard : MonoBehaviour
         if (away.sqrMagnitude < 0.0001f) away = Vector3.forward;
         Vector3 push = away.normalized * knockback;
 
-        if (body.TryGetComponent(out PlayerController controller)) controller.Knockback(push, knockTime);
+        if (body.TryGetComponent(out PlayerController controller)) controller.knockback(push, knockTime);
         else body.AddForce(push, ForceMode.Impulse);
     }
 }

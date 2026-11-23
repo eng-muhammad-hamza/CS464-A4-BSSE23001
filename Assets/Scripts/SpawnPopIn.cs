@@ -15,14 +15,14 @@ public class SpawnPopIn : MonoBehaviour
 
     void Start()
     {
-        if (sparkleOnSpawn) JuiceFx.Burst(transform.position, Color.white, 8, 2f, 0.1f, 0.4f);
+        if (sparkleOnSpawn) JuiceFx.burst(transform.position, Color.white, 8, 2f, 0.1f, 0.4f);
     }
 
     void Update()
     {
         elapsedSeconds += Time.deltaTime;
         float progress = Mathf.Clamp01(elapsedSeconds / popSeconds);
-        transform.localScale = finalScale * EaseOutBack(progress);
+        transform.localScale = finalScale * easeOutBack(progress);
         if (progress >= 1f)
         {
             transform.localScale = finalScale;
@@ -30,7 +30,7 @@ public class SpawnPopIn : MonoBehaviour
         }
     }
 
-    static float EaseOutBack(float progress)
+    static float easeOutBack(float progress)
     {
         const float overshoot = 1.70158f;
         float shifted = progress - 1f;

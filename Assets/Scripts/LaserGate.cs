@@ -12,27 +12,27 @@ public class LaserGate : MonoBehaviour
 
     IEnumerator Start()
     {
-        SetBeam(false, false);
+        setBeam(false, false);
         if (startDelay > 0f) yield return new WaitForSeconds(startDelay);
         while (true)
         {
-            SetBeam(false, false);
+            setBeam(false, false);
             yield return new WaitForSeconds(offSeconds);
 
             float t = 0f;
             while (t < warnSeconds)
             {
-                SetBeam(Mathf.FloorToInt(t * 12f) % 2 == 0, false);
+                setBeam(Mathf.FloorToInt(t * 12f) % 2 == 0, false);
                 t += Time.deltaTime;
                 yield return null;
             }
 
-            SetBeam(true, true);
+            setBeam(true, true);
             yield return new WaitForSeconds(onSeconds);
         }
     }
 
-    void SetBeam(bool visible, bool dangerous)
+    void setBeam(bool visible, bool dangerous)
     {
         beamRenderer.enabled = visible;
         beamCollider.enabled = dangerous;
