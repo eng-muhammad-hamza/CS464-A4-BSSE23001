@@ -10,7 +10,7 @@ public class CollapsingTile : MonoBehaviour
     [SerializeField] float fallSeconds = 0.7f;
     [SerializeField] float respawnSeconds = 6f;
 
-    static readonly Color WarnColor = new Color(1f, 0.45f, 0.1f);
+    static readonly Color warnColor = new Color(1f, 0.45f, 0.1f);
     Material material;
     Color baseColor;
     Vector3 visualHome;
@@ -25,24 +25,24 @@ public class CollapsingTile : MonoBehaviour
         visualScale = visual.localScale;
     }
 
-    void OnCollisionEnter(Collision collision) => Touch(collision.collider);
-    void OnCollisionStay(Collision collision) => Touch(collision.collider);
+    void OnCollisionEnter(Collision collision) => touch(collision.collider);
+    void OnCollisionStay(Collision collision) => touch(collision.collider);
 
-    void Touch(Collider other)
+    void touch(Collider other)
     {
         if (busy || !other.CompareTag("Player")) return;
         busy = true;
-        StartCoroutine(Collapse());
+        StartCoroutine(collapse());
     }
 
-    IEnumerator Collapse()
+    IEnumerator collapse()
     {
         float t = 0f;
         while (t < crumbleSeconds)
         {
             t += Time.deltaTime;
             float k = Mathf.Clamp01(t / crumbleSeconds);
-            material.color = Color.Lerp(baseColor, WarnColor, k);
+            material.color = Color.Lerp(baseColor, warnColor, k);
             Vector2 jitter = Random.insideUnitCircle * (0.05f * k);
             visual.localPosition = visualHome + new Vector3(jitter.x, 0f, jitter.y);
             yield return null;
@@ -50,8 +50,8 @@ public class CollapsingTile : MonoBehaviour
         visual.localPosition = visualHome;
 
         solid.enabled = false;
-        ClearPickupsOnTile();
-        JuiceFx.Burst(transform.position, new Color(0.6f, 0.58f, 0.55f), 10, 3f, 0.2f, 0.5f);
+        clearPickupsOnTile();
+        JuiceFx.burst(transform.position, new Color(0.6f, 0.58f, 0.55f), 10, 3f, 0.2f, 0.5f);
 
         t = 0f;
         float drop = 0f;
@@ -84,7 +84,7 @@ public class CollapsingTile : MonoBehaviour
         busy = false;
     }
 
-    void ClearPickupsOnTile()
+    void clearPickupsOnTile()
     {
         Collider[] hits = Physics.OverlapBox(transform.position + Vector3.up * 0.8f, new Vector3(0.95f, 0.8f, 0.95f),
                                              Quaternion.identity, ~0, QueryTriggerInteraction.Collide);

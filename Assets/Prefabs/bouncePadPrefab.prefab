@@ -182,4 +182,5 @@ MonoBehaviour:
   launchSpeed: 8
   keepSideways: 0.5
   cooldown: 0.3
+  launchClip: {fileID: 8300000, guid: 5383c594fccfd9142a629168ca8c4039, type: 3}
   visual: {fileID: 3231864554033426387}

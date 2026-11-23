@@ -13,7 +13,7 @@ public class UiPunch : MonoBehaviour
         elapsedSeconds = punchSeconds;
     }
 
-    public void Punch() => elapsedSeconds = 0f;
+    public void punch() => elapsedSeconds = 0f;
 
     void Update()
     {

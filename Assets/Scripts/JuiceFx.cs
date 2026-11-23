@@ -3,30 +3,30 @@ using UnityEngine;
 
 public static class JuiceFx
 {
-    public static readonly Color GoldColor = new Color(1f, 0.82f, 0.2f);
-    public static readonly Color ShieldColor = new Color(0.55f, 0.95f, 1f);
-    public static readonly Color SpeedColor = new Color(0.25f, 0.6f, 1f);
-    public static readonly Color DamageColor = new Color(1f, 0.25f, 0.25f);
-    public static readonly Color HeartColor = new Color(1f, 0.4f, 0.6f);
-    public static readonly Color PositiveColor = new Color(0.45f, 1f, 0.55f);
-    public static readonly Color TimeColor = new Color(0.72f, 0.5f, 1f);
-    public static readonly Color GhostColor = new Color(0.9f, 0.95f, 1f);
-    public static readonly Color EmpColor = new Color(1f, 0.55f, 0.15f);
-    public static readonly Color KeyColor = new Color(1f, 0.92f, 0.35f);
-    public static readonly Color MagnetColor = new Color(1f, 0.2f, 0.75f);
-    public static readonly Color SpringColor = new Color(0.6f, 1f, 0.2f);
-    public static readonly Color CellColor = new Color(0.25f, 1f, 0.55f);
-    public static readonly Color DashColor = new Color(0.2f, 1f, 0.75f);
-    public static readonly Color FreezeColor = new Color(0.65f, 0.85f, 1f);
-    public static readonly Color SlowColor = new Color(0.95f, 0.95f, 0.6f);
-    public static readonly Color PortalColor = new Color(0.8f, 0.4f, 1f);
+    public static readonly Color goldColor = new Color(1f, 0.82f, 0.2f);
+    public static readonly Color shieldColor = new Color(0.55f, 0.95f, 1f);
+    public static readonly Color speedColor = new Color(0.25f, 0.6f, 1f);
+    public static readonly Color damageColor = new Color(1f, 0.25f, 0.25f);
+    public static readonly Color heartColor = new Color(1f, 0.4f, 0.6f);
+    public static readonly Color positiveColor = new Color(0.45f, 1f, 0.55f);
+    public static readonly Color timeColor = new Color(0.72f, 0.5f, 1f);
+    public static readonly Color ghostColor = new Color(0.9f, 0.95f, 1f);
+    public static readonly Color empColor = new Color(1f, 0.55f, 0.15f);
+    public static readonly Color keyColor = new Color(1f, 0.92f, 0.35f);
+    public static readonly Color magnetColor = new Color(1f, 0.2f, 0.75f);
+    public static readonly Color springColor = new Color(0.6f, 1f, 0.2f);
+    public static readonly Color cellColor = new Color(0.25f, 1f, 0.55f);
+    public static readonly Color dashColor = new Color(0.2f, 1f, 0.75f);
+    public static readonly Color freezeColor = new Color(0.65f, 0.85f, 1f);
+    public static readonly Color slowColor = new Color(0.95f, 0.95f, 0.6f);
+    public static readonly Color portalColor = new Color(0.8f, 0.4f, 1f);
 
     static Material cachedParticleMaterial;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-    static void ResetStatics() => cachedParticleMaterial = null;
+    static void resetStatics() => cachedParticleMaterial = null;
 
-    public static Material ParticleMaterial
+    public static Material particleMaterial
     {
         get
         {
@@ -35,7 +35,7 @@ public static class JuiceFx
         }
     }
 
-    public static void Burst(Vector3 worldPosition, Color color, int particleCount, float speed, float particleSize,
+    public static void burst(Vector3 worldPosition, Color color, int particleCount, float speed, float particleSize,
                              float lifetimeSeconds, bool useUnscaledTime = false, float gravityModifier = 0.6f)
     {
         GameObject effectObject = new GameObject("FxBurst");
@@ -64,12 +64,12 @@ public static class JuiceFx
         shape.shapeType = ParticleSystemShapeType.Sphere;
         shape.radius = 0.15f;
 
-        ApplyFadeAndShrink(particles);
-        effectObject.GetComponent<ParticleSystemRenderer>().sharedMaterial = ParticleMaterial;
+        applyFadeAndShrink(particles);
+        effectObject.GetComponent<ParticleSystemRenderer>().sharedMaterial = particleMaterial;
         particles.Play();
     }
 
-    public static ParticleSystem CreateTrailSparks(Transform parent, Color color)
+    public static ParticleSystem createTrailSparks(Transform parent, Color color)
     {
         GameObject sparksObject = new GameObject("TrailSparks");
         sparksObject.transform.SetParent(parent, false);
@@ -93,12 +93,12 @@ public static class JuiceFx
         shape.shapeType = ParticleSystemShapeType.Sphere;
         shape.radius = 0.35f;
 
-        ApplyFadeAndShrink(sparks);
-        sparksObject.GetComponent<ParticleSystemRenderer>().sharedMaterial = ParticleMaterial;
+        applyFadeAndShrink(sparks);
+        sparksObject.GetComponent<ParticleSystemRenderer>().sharedMaterial = particleMaterial;
         return sparks;
     }
 
-    static void ApplyFadeAndShrink(ParticleSystem particles)
+    static void applyFadeAndShrink(ParticleSystem particles)
     {
         ParticleSystem.SizeOverLifetimeModule sizeModule = particles.sizeOverLifetime;
         sizeModule.enabled = true;
@@ -113,14 +113,14 @@ public static class JuiceFx
         colorModule.color = fadeOut;
     }
 
-    public static void Ring(Vector3 worldPosition, Color color, float maxRadius, float seconds, bool useUnscaledTime = false)
+    public static void ring(Vector3 worldPosition, Color color, float maxRadius, float seconds, bool useUnscaledTime = false)
     {
         GameObject ringObject = new GameObject("FxRing");
         ringObject.transform.position = worldPosition;
-        ringObject.AddComponent<ExpandingRing>().Begin(color, maxRadius, seconds, useUnscaledTime);
+        ringObject.AddComponent<ExpandingRing>().begin(color, maxRadius, seconds, useUnscaledTime);
     }
 
-    public static void FloatingText(Vector3 worldPosition, string message, Color color, float fontSize = 14f)
+    public static void floatingText(Vector3 worldPosition, string message, Color color, float fontSize = 14f)
     {
         GameObject textObject = new GameObject("FloatingText");
         textObject.transform.position = worldPosition;
@@ -137,7 +137,7 @@ public static class JuiceFx
 
 public class ExpandingRing : MonoBehaviour
 {
-    const int SegmentCount = 48;
+    const int segmentCount = 48;
     LineRenderer line;
     Color ringColor;
     float maxRadius;
@@ -145,7 +145,7 @@ public class ExpandingRing : MonoBehaviour
     float elapsedSeconds;
     bool useUnscaledTime;
 
-    public void Begin(Color color, float radius, float seconds, bool unscaled)
+    public void begin(Color color, float radius, float seconds, bool unscaled)
     {
         ringColor = color;
         maxRadius = radius;
@@ -154,26 +154,26 @@ public class ExpandingRing : MonoBehaviour
         line = gameObject.AddComponent<LineRenderer>();
         line.useWorldSpace = false;
         line.loop = true;
-        line.positionCount = SegmentCount;
-        line.sharedMaterial = JuiceFx.ParticleMaterial;
-        Apply(0f);
+        line.positionCount = segmentCount;
+        line.sharedMaterial = JuiceFx.particleMaterial;
+        apply(0f);
     }
 
     void Update()
     {
         elapsedSeconds += useUnscaledTime ? Time.unscaledDeltaTime : Time.deltaTime;
         float progress = Mathf.Clamp01(elapsedSeconds / durationSeconds);
-        Apply(progress);
+        apply(progress);
         if (progress >= 1f) Destroy(gameObject);
     }
 
-    void Apply(float progress)
+    void apply(float progress)
     {
         float easedProgress = 1f - (1f - progress) * (1f - progress);
         float radius = Mathf.Lerp(0.1f, maxRadius, easedProgress);
-        for (int i = 0; i < SegmentCount; i++)
+        for (int i = 0; i < segmentCount; i++)
         {
-            float angle = i * Mathf.PI * 2f / SegmentCount;
+            float angle = i * Mathf.PI * 2f / segmentCount;
             line.SetPosition(i, new Vector3(Mathf.Cos(angle) * radius, 0f, Mathf.Sin(angle) * radius));
         }
         Color fadedColor = ringColor;
@@ -188,8 +188,8 @@ public class ExpandingRing : MonoBehaviour
 
 public class FloatingTextMotion : MonoBehaviour
 {
-    const float LifetimeSeconds = 1f;
-    const float RiseDistance = 1.8f;
+    const float textLifetimeSeconds = 1f;
+    const float riseDistance = 1.8f;
     TextMeshPro text;
     Vector3 startPosition;
     Color startColor;
@@ -205,12 +205,12 @@ public class FloatingTextMotion : MonoBehaviour
     void Update()
     {
         elapsedSeconds += Time.unscaledDeltaTime;
-        float progress = Mathf.Clamp01(elapsedSeconds / LifetimeSeconds);
+        float progress = Mathf.Clamp01(elapsedSeconds / textLifetimeSeconds);
         Camera mainCamera = Camera.main;
         Vector3 screenUp = mainCamera != null ? mainCamera.transform.up : Vector3.up;
 
         float rise = 1f - Mathf.Pow(1f - progress, 3f);
-        transform.position = startPosition + screenUp * (rise * RiseDistance);
+        transform.position = startPosition + screenUp * (rise * riseDistance);
         if (mainCamera != null) transform.rotation = mainCamera.transform.rotation;
 
         float popScale = progress < 0.15f

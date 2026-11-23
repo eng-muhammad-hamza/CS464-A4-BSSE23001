@@ -33,7 +33,7 @@ public class EnemyPatrol : MonoBehaviour
     int step = 1;
     float waitUntil;
 
-    public GuardState State => state;
+    public GuardState currentState => state;
 
     void Awake()
     {
@@ -59,84 +59,84 @@ public class EnemyPatrol : MonoBehaviour
     void FixedUpdate()
     {
         if (points == null || points.Length == 0) return;
-        UpdateState();
+        updateState();
 
         switch (state)
         {
             case GuardState.Chase:
-                MoveToward(player.position, chaseSpeed);
+                moveToward(player.position, chaseSpeed);
                 break;
             case GuardState.Return:
                 Vector3 home = points[index].position;
-                if (Arrived(home)) SetState(GuardState.Patrol);
-                else MoveToward(home, speed);
+                if (arrived(home)) setState(GuardState.Patrol);
+                else moveToward(home, speed);
                 break;
             default:
-                Patrol();
+                patrol();
                 break;
         }
     }
 
-    void UpdateState()
+    void updateState()
     {
         if (state == GuardState.Chase)
         {
-            if (!InRange(giveUpRange)) SetState(GuardState.Return);
+            if (!inRange(giveUpRange)) setState(GuardState.Return);
         }
-        else if (InRange(chaseRange))
+        else if (inRange(chaseRange))
         {
-            SetState(GuardState.Chase);
+            setState(GuardState.Chase);
         }
     }
 
-    void SetState(GuardState next)
+    void setState(GuardState next)
     {
         if (next == state) return;
         state = next;
         Vector3 above = transform.position + Vector3.up * 2f;
         if (next == GuardState.Chase)
         {
-            JuiceFx.FloatingText(above, "!", JuiceFx.DamageColor, 22f);
-            JuiceFx.Ring(transform.position, JuiceFx.DamageColor, 2.5f, 0.35f);
+            JuiceFx.floatingText(above, "!", JuiceFx.damageColor, 22f);
+            JuiceFx.ring(transform.position, JuiceFx.damageColor, 2.5f, 0.35f);
             if (bodyMaterial != null) bodyMaterial.color = chaseColor;
         }
         else if (next == GuardState.Return)
         {
-            JuiceFx.FloatingText(above, "?", JuiceFx.SlowColor, 18f);
+            JuiceFx.floatingText(above, "?", JuiceFx.slowColor, 18f);
         }
         if (next != GuardState.Chase && bodyMaterial != null) bodyMaterial.color = patrolColor;
     }
 
-    void Patrol()
+    void patrol()
     {
         if (Time.time < waitUntil) return;
         Vector3 target = points[index].position;
-        if (Arrived(target))
+        if (arrived(target))
         {
-            index = NextIndex();
+            index = nextIndex();
             waitUntil = Time.time + waitTime;
             return;
         }
-        MoveToward(target, speed);
+        moveToward(target, speed);
     }
 
-    bool Arrived(Vector3 target) => FlatDistance(rb.position, target) < arriveDistance;
+    bool arrived(Vector3 target) => flatDistance(rb.position, target) < arriveDistance;
 
-    bool InRange(float range)
+    bool inRange(float range)
     {
         if (player == null || range <= 0f) return false;
-        if (playerHealth != null && playerHealth.Current <= 0) return false;
-        return FlatDistance(rb.position, player.position) < range;
+        if (playerHealth != null && playerHealth.current <= 0) return false;
+        return flatDistance(rb.position, player.position) < range;
     }
 
-    static float FlatDistance(Vector3 a, Vector3 b)
+    static float flatDistance(Vector3 a, Vector3 b)
     {
         a.y = 0f;
         b.y = 0f;
         return Vector3.Distance(a, b);
     }
 
-    void MoveToward(Vector3 target, float moveSpeed)
+    void moveToward(Vector3 target, float moveSpeed)
     {
         Vector3 from = rb.position;
         target.y = from.y;
@@ -149,7 +149,7 @@ public class EnemyPatrol : MonoBehaviour
         }
     }
 
-    int NextIndex()
+    int nextIndex()
     {
         if (points.Length == 1) return 0;
         if (mode == PatrolMode.Loop) return (index + 1) % points.Length;

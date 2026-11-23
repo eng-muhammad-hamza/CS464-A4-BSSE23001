@@ -26,9 +26,9 @@ public class Turret : MonoBehaviour
     [SerializeField] float cooldownSeconds = 1.8f;
     [SerializeField] float bulletSpeed = 9f;
 
-    static readonly Color IdleColor = new Color(0.35f, 0.38f, 0.46f);
-    static readonly Color AimColor = new Color(1f, 0.25f, 0.2f);
-    static readonly Color SightWarm = new Color(1f, 0.95f, 0.7f);
+    static readonly Color idleColor = new Color(0.35f, 0.38f, 0.46f);
+    static readonly Color aimColor = new Color(1f, 0.25f, 0.2f);
+    static readonly Color sightWarm = new Color(1f, 0.95f, 0.7f);
 
     Material headMaterial;
     Transform player;
@@ -54,30 +54,30 @@ public class Turret : MonoBehaviour
         head.rotation = Quaternion.Euler(0f, baseYaw, 0f);
         armedAt = Time.time + startDelay;
         if (aimBeam != null) aimBeam.gameObject.SetActive(false);
-        SetLook(IdleColor, SightWarm);
+        setLook(idleColor, sightWarm);
     }
 
     void Update()
     {
         if (player == null || playerHealth == null) return;
-        if (GameManager.Instance != null && GameManager.Instance.IsFinished) return;
+        if (GameManager.instance != null && GameManager.instance.isFinished) return;
 
         if (Time.time < armedAt) return;
 
         float yaw;
         if (state == State.Aim)
         {
-            yaw = YawTo(player.position);
-            if (!CanSee()) BackToSweep();
+            yaw = yawTo(player.position);
+            if (!canSee()) backToSweep();
             else if (Time.time >= stateEndTime)
             {
-                Fire();
+                fire();
                 state = State.Cooldown;
                 stateEndTime = Time.time + cooldownSeconds;
                 if (aimBeam != null) aimBeam.gameObject.SetActive(false);
-                SetLook(IdleColor, SightWarm);
+                setLook(idleColor, sightWarm);
             }
-            else UpdateBeam();
+            else updateBeam();
         }
         else
         {
@@ -87,11 +87,11 @@ public class Turret : MonoBehaviour
             {
                 if (Time.time >= stateEndTime) state = State.Sweep;
             }
-            else if (CanSee())
+            else if (canSee())
             {
                 state = State.Aim;
                 stateEndTime = Time.time + aimSeconds;
-                SetLook(AimColor, AimColor);
+                setLook(aimColor, aimColor);
                 if (aimBeam != null) aimBeam.gameObject.SetActive(true);
             }
         }
@@ -99,16 +99,16 @@ public class Turret : MonoBehaviour
         head.rotation = Quaternion.RotateTowards(head.rotation, Quaternion.Euler(0f, yaw, 0f), turnSpeed * Time.deltaTime);
     }
 
-    void BackToSweep()
+    void backToSweep()
     {
         state = State.Sweep;
         if (aimBeam != null) aimBeam.gameObject.SetActive(false);
-        SetLook(IdleColor, SightWarm);
+        setLook(idleColor, sightWarm);
     }
 
-    bool CanSee()
+    bool canSee()
     {
-        if (playerHealth.Current <= 0) return false;
+        if (playerHealth.current <= 0) return false;
         Vector3 origin = muzzle.position;
         Vector3 target = player.position;
         target.y = origin.y;
@@ -122,18 +122,18 @@ public class Turret : MonoBehaviour
         return false;
     }
 
-    void Fire()
+    void fire()
     {
         if (bulletPrefab == null) return;
         Vector3 target = player.position;
         target.y = muzzle.position.y;
         Vector3 direction = (target - muzzle.position).normalized;
         GameObject bullet = Instantiate(bulletPrefab, muzzle.position, Quaternion.LookRotation(direction));
-        if (bullet.TryGetComponent(out Projectile projectile)) projectile.Launch(direction, bulletSpeed);
-        JuiceFx.Burst(muzzle.position, JuiceFx.DamageColor, 6, 3f, 0.1f, 0.25f);
+        if (bullet.TryGetComponent(out Projectile projectile)) projectile.launch(direction, bulletSpeed);
+        JuiceFx.burst(muzzle.position, JuiceFx.damageColor, 6, 3f, 0.1f, 0.25f);
     }
 
-    void UpdateBeam()
+    void updateBeam()
     {
         if (aimBeam == null) return;
         Vector3 flat = player.position - muzzle.position;
@@ -144,13 +144,13 @@ public class Turret : MonoBehaviour
         aimBeam.localScale = new Vector3(aimBeam.localScale.x, aimBeam.localScale.y, distance);
     }
 
-    float YawTo(Vector3 point)
+    float yawTo(Vector3 point)
     {
         Vector3 d = point - transform.position;
         return Mathf.Atan2(d.x, d.z) * Mathf.Rad2Deg;
     }
 
-    void SetLook(Color body, Color beam)
+    void setLook(Color body, Color beam)
     {
         if (headMaterial != null) headMaterial.color = body;
         if (sightLight != null) sightLight.color = beam;

@@ -35,7 +35,7 @@ public class EasedMover : MonoBehaviour
         else if (p < travel * 2f + pauseSeconds) u = 1f - (p - travel - pauseSeconds) / travel;
         else u = 0f;
 
-        Vector3 target = startPosition + offset * Apply(u);
+        Vector3 target = startPosition + offset * apply(u);
         lastStep = target - body.position;
         body.MovePosition(target);
     }
@@ -47,17 +47,17 @@ public class EasedMover : MonoBehaviour
         collision.rigidbody.position += lastStep;
     }
 
-    float Apply(float x)
+    float apply(float x)
     {
         switch (ease)
         {
             case EaseType.SmoothStep: return x * x * (3f - 2f * x);
-            case EaseType.Bounce: return EaseOutBounce(x);
+            case EaseType.Bounce: return easeOutBounce(x);
             default: return x;
         }
     }
 
-    static float EaseOutBounce(float x)
+    static float easeOutBounce(float x)
     {
         const float n1 = 7.5625f, d1 = 2.75f;
         if (x < 1f / d1) return n1 * x * x;

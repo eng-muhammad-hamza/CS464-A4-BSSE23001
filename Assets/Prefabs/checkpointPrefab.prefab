@@ -50,6 +50,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Checkpoint
   flagRenderer: {fileID: 7991000044455552219}
   healAmount: 1
+  reachedClip: {fileID: 8300000, guid: 60e2e03fcfbaa264a81d5008482b73c8, type: 3}
 --- !u!65 &5706283595636775538
 BoxCollider:
   m_ObjectHideFlags: 0

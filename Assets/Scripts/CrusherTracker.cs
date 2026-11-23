@@ -28,8 +28,8 @@ public class CrusherTracker : MonoBehaviour
     void Update()
     {
         if (player == null || crusher == null) return;
-        if (!crusher.IsResting) return;
-        if (playerHealth != null && playerHealth.Current <= 0) return;
+        if (!crusher.isResting) return;
+        if (playerHealth != null && playerHealth.current <= 0) return;
 
         Vector3 target = new Vector3(
             Mathf.Clamp(player.position.x, minXZ.x, maxXZ.x),

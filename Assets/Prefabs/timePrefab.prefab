@@ -152,6 +152,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TimePickup
   seconds: 5
+  pickupFx: {fileID: 1407062553283993150, guid: 41168d011ac53934a96834e39e309024, type: 3}
+  pickupClip: {fileID: 8300000, guid: f7ab6758d96d59e4aa0cd23e447c0a25, type: 3}
 --- !u!114 &109973883314971551
 MonoBehaviour:
   m_ObjectHideFlags: 0

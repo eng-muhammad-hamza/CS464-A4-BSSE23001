@@ -197,9 +197,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2a2dc7dcefcc84d499a9f5ee6a3e3839, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PowerUp
-  type: 0
   multiplier: 1.6
   duration: 5
+  pickupFx: {fileID: 1407062553283993150, guid: 41168d011ac53934a96834e39e309024, type: 3}
+  pickupClip: {fileID: 8300000, guid: 166aab804e52c3e45a73527ec9763674, type: 3}
 --- !u!114 &7938849483351875602
 MonoBehaviour:
   m_ObjectHideFlags: 0

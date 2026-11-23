@@ -1,18 +1,13 @@
-using TMPro;
 using UnityEngine;
 
+[RequireComponent(typeof(CanvasGroup))]
 public class HintFade : MonoBehaviour
 {
     [SerializeField] float showSeconds = 6f;
     [SerializeField] float fadeSeconds = 1f;
-    TMP_Text label;
-    float startAlpha = 1f;
+    CanvasGroup group;
 
-    void Awake()
-    {
-        label = GetComponent<TMP_Text>();
-        if (label != null) startAlpha = label.alpha;
-    }
+    void Awake() => group = GetComponent<CanvasGroup>();
 
     void Update()
     {
@@ -22,7 +17,6 @@ public class HintFade : MonoBehaviour
             gameObject.SetActive(false);
             return;
         }
-        if (label != null && t > showSeconds)
-            label.alpha = startAlpha * (1f - (t - showSeconds) / fadeSeconds);
+        if (t > showSeconds) group.alpha = 1f - (t - showSeconds) / fadeSeconds;
     }
 }

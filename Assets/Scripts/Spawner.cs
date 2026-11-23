@@ -20,8 +20,8 @@ public class Spawner : MonoBehaviour
     [SerializeField] int maxPowerUps = 2;
     [SerializeField] float powerUpLifetimeSeconds = 15f;
 
-    const int MaxPlacementAttempts = 40;
-    const float PickupHeight = 0.8f;
+    const int maxPlacementAttempts = 40;
+    const float pickupHeight = 0.8f;
 
     Transform coinContainer;
     Transform powerUpContainer;
@@ -36,23 +36,23 @@ public class Spawner : MonoBehaviour
             return;
         }
 
-        coinContainer = CreateContainer("SpawnedCoins");
-        powerUpContainer = CreateContainer("SpawnedPowerUps");
+        coinContainer = createContainer("SpawnedCoins");
+        powerUpContainer = createContainer("SpawnedPowerUps");
         spawnBlockers = FindObjectsByType<SpawnBlocker>(FindObjectsInactive.Include, FindObjectsSortMode.None);
 
-        InvokeRepeating(nameof(SpawnCoin), 1f, Mathf.Max(0.1f, interval));
-        if (HasAnyPowerUpPrefab())
-            InvokeRepeating(nameof(SpawnPowerUp), powerUpInterval, Mathf.Max(0.1f, powerUpInterval));
+        InvokeRepeating(nameof(spawnCoin), 1f, Mathf.Max(0.1f, interval));
+        if (hasAnyPowerUpPrefab())
+            InvokeRepeating(nameof(spawnPowerUp), powerUpInterval, Mathf.Max(0.1f, powerUpInterval));
     }
 
-    Transform CreateContainer(string containerName)
+    Transform createContainer(string containerName)
     {
         Transform container = new GameObject(containerName).transform;
         container.SetParent(transform, false);
         return container;
     }
 
-    bool HasAnyPowerUpPrefab()
+    bool hasAnyPowerUpPrefab()
     {
         if (powerUpPrefabs == null) return false;
         foreach (GameObject prefab in powerUpPrefabs)
@@ -60,31 +60,31 @@ public class Spawner : MonoBehaviour
         return false;
     }
 
-    void SpawnCoin()
+    void spawnCoin()
     {
         if (coinContainer.childCount >= maxCoins) return;
-        if (!TryFindFreePosition(out Vector3 spawnPosition)) return;
+        if (!tryFindFreePosition(out Vector3 spawnPosition)) return;
         Instantiate(coinPrefab, spawnPosition, Quaternion.identity, coinContainer);
     }
 
-    void SpawnPowerUp()
+    void spawnPowerUp()
     {
         if (powerUpContainer.childCount >= maxPowerUps) return;
         GameObject chosenPrefab = powerUpPrefabs[Random.Range(0, powerUpPrefabs.Length)];
         if (chosenPrefab == null) return;
-        if (!TryFindFreePosition(out Vector3 spawnPosition)) return;
+        if (!tryFindFreePosition(out Vector3 spawnPosition)) return;
         GameObject spawned = Instantiate(chosenPrefab, spawnPosition, Quaternion.identity, powerUpContainer);
         if (powerUpLifetimeSeconds > 0f) Destroy(spawned, powerUpLifetimeSeconds);
     }
 
-    bool TryFindFreePosition(out Vector3 freePosition)
+    bool tryFindFreePosition(out Vector3 freePosition)
     {
-        for (int attempt = 0; attempt < MaxPlacementAttempts; attempt++)
+        for (int attempt = 0; attempt < maxPlacementAttempts; attempt++)
         {
-            Transform zone = PickZone();
+            Transform zone = pickZone();
             Vector3 candidate = zone.TransformPoint(new Vector3(Random.Range(-0.5f, 0.5f), 0f, Random.Range(-0.5f, 0.5f)));
-            candidate.y = zone.position.y + PickupHeight;
-            if (!IsFreeSpot(candidate)) continue;
+            candidate.y = zone.position.y + pickupHeight;
+            if (!isFreeSpot(candidate)) continue;
             freePosition = candidate;
             return true;
         }
@@ -92,37 +92,37 @@ public class Spawner : MonoBehaviour
         return false;
     }
 
-    Transform PickZone()
+    Transform pickZone()
     {
         float total = 0f;
-        foreach (Transform zone in zones) total += Area(zone);
+        foreach (Transform zone in zones) total += area(zone);
         float roll = Random.Range(0f, total);
         foreach (Transform zone in zones)
         {
-            roll -= Area(zone);
+            roll -= area(zone);
             if (roll <= 0f) return zone;
         }
         return zones[zones.Length - 1];
     }
 
-    static float Area(Transform zone) => Mathf.Abs(zone.lossyScale.x * zone.lossyScale.z);
+    static float area(Transform zone) => Mathf.Abs(zone.lossyScale.x * zone.lossyScale.z);
 
-    bool IsFreeSpot(Vector3 candidate)
+    bool isFreeSpot(Vector3 candidate)
     {
-        if (FlatDistance(candidate, player.position) < minDistanceFromPlayer) return false;
+        if (flatDistance(candidate, player.position) < minDistanceFromPlayer) return false;
         foreach (SpawnBlocker blocker in spawnBlockers)
-            if (blocker != null && blocker.Covers(candidate, hazardClearance)) return false;
-        return !IsTooCloseToAnyChild(coinContainer, candidate) && !IsTooCloseToAnyChild(powerUpContainer, candidate);
+            if (blocker != null && blocker.covers(candidate, hazardClearance)) return false;
+        return !isTooCloseToAnyChild(coinContainer, candidate) && !isTooCloseToAnyChild(powerUpContainer, candidate);
     }
 
-    bool IsTooCloseToAnyChild(Transform container, Vector3 candidate)
+    bool isTooCloseToAnyChild(Transform container, Vector3 candidate)
     {
         foreach (Transform child in container)
-            if (FlatDistance(candidate, child.position) < minDistanceBetweenPickups) return true;
+            if (flatDistance(candidate, child.position) < minDistanceBetweenPickups) return true;
         return false;
     }
 
-    static float FlatDistance(Vector3 a, Vector3 b)
+    static float flatDistance(Vector3 a, Vector3 b)
     {
         float dx = a.x - b.x;
         float dz = a.z - b.z;

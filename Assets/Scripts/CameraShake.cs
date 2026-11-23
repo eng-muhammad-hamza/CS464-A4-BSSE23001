@@ -2,9 +2,9 @@ using UnityEngine;
 
 public class CameraShake : MonoBehaviour
 {
-    public static CameraShake Instance { get; private set; }
+    public static CameraShake instance { get; private set; }
 
-    public Vector3 RestingLocalPosition { get; set; }
+    public Vector3 restingLocalPosition { get; set; }
 
     float shakeSecondsLeft;
     float shakeTotalSeconds;
@@ -12,20 +12,20 @@ public class CameraShake : MonoBehaviour
 
     void Awake()
     {
-        Instance = this;
-        RestingLocalPosition = transform.localPosition;
+        instance = this;
+        restingLocalPosition = transform.localPosition;
     }
 
-    public void Shake(float durationSeconds, float magnitude)
+    public void shake(float durationSeconds, float magnitude)
     {
         if (durationSeconds <= 0f || magnitude <= 0f) return;
-        if (magnitude < CurrentShakeStrength()) return;
+        if (magnitude < currentShakeStrength()) return;
         shakeSecondsLeft = durationSeconds;
         shakeTotalSeconds = durationSeconds;
         shakeMagnitude = magnitude;
     }
 
-    float CurrentShakeStrength() =>
+    float currentShakeStrength() =>
         shakeTotalSeconds <= 0f ? 0f : shakeMagnitude * Mathf.Max(0f, shakeSecondsLeft / shakeTotalSeconds);
 
     void LateUpdate()
@@ -34,9 +34,9 @@ public class CameraShake : MonoBehaviour
         if (shakeSecondsLeft > 0f)
         {
             shakeSecondsLeft -= Time.unscaledDeltaTime;
-            Vector2 randomOffset = Random.insideUnitCircle * CurrentShakeStrength();
+            Vector2 randomOffset = Random.insideUnitCircle * currentShakeStrength();
             shakeOffset = new Vector3(randomOffset.x, randomOffset.y, 0f);
         }
-        transform.localPosition = RestingLocalPosition + shakeOffset;
+        transform.localPosition = restingLocalPosition + shakeOffset;
     }
 }

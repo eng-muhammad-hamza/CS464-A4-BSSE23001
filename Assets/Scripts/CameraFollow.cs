@@ -21,7 +21,7 @@ public class CameraFollow : MonoBehaviour
     {
         if (target == null) return;
         targetBody = target.GetComponent<Rigidbody>();
-        shake.RestingLocalPosition = Desired();
+        shake.restingLocalPosition = desired();
     }
 
     void LateUpdate()
@@ -35,10 +35,10 @@ public class CameraFollow : MonoBehaviour
         }
         float blend = 1f - Mathf.Exp(-smoothing * Time.unscaledDeltaTime);
         lookAhead = Vector3.Lerp(lookAhead, wanted, blend);
-        shake.RestingLocalPosition = Vector3.Lerp(shake.RestingLocalPosition, Desired(), blend);
+        shake.restingLocalPosition = Vector3.Lerp(shake.restingLocalPosition, desired(), blend);
     }
 
-    Vector3 Desired()
+    Vector3 desired()
     {
         Vector3 p = target.position + lookAhead + offset;
         p.x = Mathf.Clamp(p.x, minXZ.x, maxXZ.x);
