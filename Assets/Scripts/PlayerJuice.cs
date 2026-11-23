@@ -5,28 +5,14 @@ using UnityEngine;
 [RequireComponent(typeof(PlayerController))]
 public class PlayerJuice : MonoBehaviour
 {
-    [Header("Parts")]
-    [SerializeField] Renderer bodyRenderer;
-    [SerializeField] Renderer[] detailRenderers;
-    [SerializeField] Transform squashRoot;
-
     [Header("Tuning")]
     [SerializeField] float hitStopSeconds = 0.06f;
     [SerializeField] float boostEndingWarningSeconds = 1.2f;
     [SerializeField] float invulnerabilityBlinkRate = 14f;
 
-    [Header("Squash and stretch")]
-    [SerializeField] float squashSpring = 180f;
-    [SerializeField] float squashDamping = 14f;
-    [SerializeField] float jumpStretchKick = 3.5f;
-    [SerializeField] float landSquashAtSpeed = 14f;
-    [SerializeField] float maxLandSquash = 0.3f;
-    [SerializeField] float runBobAmount = 0.03f;
-    [SerializeField] float runBobFrequency = 14f;
-    [SerializeField] float runBobFullSpeed = 7f;
-
     Health health;
     PlayerController controller;
+    Renderer bodyRenderer;
     Material bodyMaterial;
     Color baseBodyColor;
     TrailRenderer speedTrail;
@@ -36,126 +22,101 @@ public class PlayerJuice : MonoBehaviour
     float flashTotalSeconds;
     bool isDead;
 
-    float squash;
-    float squashVelocity;
-
     void Awake()
     {
         health = GetComponent<Health>();
         controller = GetComponent<PlayerController>();
-
-        if (bodyRenderer == null) bodyRenderer = GetComponentInChildren<MeshRenderer>();
-        if (bodyRenderer == null)
-        {
-            Debug.LogError("PlayerJuice: assign a body Renderer (the capsule mesh).", this);
-            enabled = false;
-            return;
-        }
+        bodyRenderer = GetComponent<Renderer>();
+        if (bodyRenderer == null) bodyRenderer = GetComponentInChildren<Renderer>();
         bodyMaterial = bodyRenderer.material;
         baseBodyColor = bodyMaterial.color;
-        BuildSpeedEffects();
+        buildSpeedEffects();
     }
 
-    void BuildSpeedEffects()
+    void buildSpeedEffects()
     {
         speedTrail = gameObject.AddComponent<TrailRenderer>();
         speedTrail.time = 0.4f;
         speedTrail.startWidth = 0.8f;
         speedTrail.endWidth = 0f;
         speedTrail.minVertexDistance = 0.05f;
-        speedTrail.sharedMaterial = JuiceFx.ParticleMaterial;
-        Color trailColor = JuiceFx.SpeedColor;
+        speedTrail.sharedMaterial = JuiceFx.particleMaterial;
+        Color trailColor = JuiceFx.speedColor;
         speedTrail.startColor = new Color(trailColor.r, trailColor.g, trailColor.b, 0.85f);
         speedTrail.endColor = new Color(trailColor.r, trailColor.g, trailColor.b, 0f);
         speedTrail.emitting = false;
 
-        speedSparks = JuiceFx.CreateTrailSparks(transform, JuiceFx.SpeedColor);
+        speedSparks = JuiceFx.createTrailSparks(transform, JuiceFx.speedColor);
     }
 
     void OnDisable()
     {
-        if (Time.timeScale < 1f && !IsGameFinished()) Time.timeScale = 1f;
+        if (Time.timeScale < 1f && !isGameFinished()) Time.timeScale = 1f;
     }
 
-    public void PlayerJumped() => squashVelocity += jumpStretchKick;
-
-    public void PlayerLanded(float impactSpeed)
-    {
-        if (impactSpeed < 3f) return;
-        squash = -Mathf.Clamp01(impactSpeed / landSquashAtSpeed) * maxLandSquash;
-        squashVelocity = 0f;
-    }
-
-    public void TookDamage(int heartsLost)
+    public void tookDamage(int heartsLost)
     {
         Vector3 position = transform.position;
-        JuiceFx.Burst(position, JuiceFx.DamageColor, 22, 6f, 0.2f, 0.6f);
-        JuiceFx.Ring(position, JuiceFx.DamageColor, 2.6f, 0.4f);
-        JuiceFx.FloatingText(position + Vector3.up * 1.4f, $"-{heartsLost}", JuiceFx.DamageColor, 18f);
-        ShakeCamera(0.28f, 0.35f);
-        StartBodyFlash(JuiceFx.DamageColor, 0.25f);
-        StartCoroutine(HitStopRoutine(hitStopSeconds));
+        JuiceFx.ring(position, JuiceFx.damageColor, 2.6f, 0.4f);
+        JuiceFx.floatingText(position + Vector3.up * 1.2f, $"-{heartsLost}", JuiceFx.damageColor, 18f);
+        shakeCamera(0.28f, 0.35f);
+        startBodyFlash(JuiceFx.damageColor, 0.25f);
+        StartCoroutine(hitStopRoutine(hitStopSeconds));
     }
 
-    public void Healed(int heartsGained)
+    public void healed(int heartsGained)
     {
-        JuiceFx.Burst(transform.position, JuiceFx.PositiveColor, 24, 5f, 0.18f, 0.6f);
-        JuiceFx.FloatingText(transform.position + Vector3.up * 1.4f, $"+{heartsGained}", JuiceFx.PositiveColor, 18f);
+        JuiceFx.burst(transform.position, JuiceFx.positiveColor, 24, 5f, 0.18f, 0.6f);
+        JuiceFx.floatingText(transform.position + Vector3.up * 1.2f, $"+{heartsGained}", JuiceFx.positiveColor, 18f);
     }
 
-    public void Died()
+    public void died()
     {
         isDead = true;
         speedTrail.emitting = false;
         Vector3 position = transform.position;
-        JuiceFx.Burst(position, JuiceFx.DamageColor, 60, 8f, 0.25f, 0.9f);
-        JuiceFx.Burst(position, Color.white, 20, 5f, 0.15f, 0.6f);
-        JuiceFx.Ring(position, JuiceFx.DamageColor, 4.5f, 0.55f);
-        ShakeCamera(0.5f, 0.6f);
-        StartCoroutine(HitStopRoutine(hitStopSeconds * 2f));
+        JuiceFx.burst(position, JuiceFx.damageColor, 60, 8f, 0.25f, 0.9f);
+        JuiceFx.burst(position, Color.white, 20, 5f, 0.15f, 0.6f);
+        JuiceFx.ring(position, JuiceFx.damageColor, 4.5f, 0.55f);
+        shakeCamera(0.5f, 0.6f);
+        StartCoroutine(hitStopRoutine(hitStopSeconds * 2f));
     }
 
-    public void Respawned()
+    public void respawned()
     {
         isDead = false;
-        squash = 0f;
-        squashVelocity = 0f;
         speedTrail.Clear();
         Vector3 position = transform.position;
-        JuiceFx.Burst(position, Color.white, 28, 6f, 0.18f, 0.6f);
-        JuiceFx.Ring(position, Color.white, 3.5f, 0.5f);
+        JuiceFx.burst(position, Color.white, 28, 6f, 0.18f, 0.6f);
+        JuiceFx.ring(position, Color.white, 3.5f, 0.5f);
     }
 
-    public void SpeedBoostStarted()
+    public void speedBoostStarted()
     {
         speedTrail.emitting = true;
         speedSparks.Play();
-        JuiceFx.Ring(transform.position, JuiceFx.SpeedColor, 3f, 0.4f);
+        JuiceFx.ring(transform.position, JuiceFx.speedColor, 3f, 0.4f);
     }
 
-    public void SpeedBoostEnded()
+    public void speedBoostEnded()
     {
         speedTrail.emitting = false;
         speedSparks.Stop(true, ParticleSystemStopBehavior.StopEmitting);
-        JuiceFx.Burst(transform.position, JuiceFx.SpeedColor, 14, 3f, 0.14f, 0.4f);
+        JuiceFx.burst(transform.position, JuiceFx.speedColor, 14, 3f, 0.14f, 0.4f);
     }
 
     void Update()
     {
-        bool blinkHidden = health.IsInvulnerable && Mathf.FloorToInt(Time.time * invulnerabilityBlinkRate) % 2 == 0;
-        bool visible = !isDead && !blinkHidden;
-        bodyRenderer.enabled = visible;
-        if (detailRenderers != null)
-            foreach (Renderer detail in detailRenderers)
-                if (detail != null) detail.enabled = visible;
+        bool blinkHidden = health.isInvulnerable && Mathf.FloorToInt(Time.time * invulnerabilityBlinkRate) % 2 == 0;
+        bodyRenderer.enabled = !isDead && !blinkHidden;
 
         Color finalColor = baseBodyColor;
-        if (controller.IsSpeedBoosted)
+        if (controller.isSpeedBoosted)
         {
             float blend = 0.5f + 0.25f * Mathf.Sin(Time.time * 12f);
-            if (controller.SpeedBoostSecondsRemaining < boostEndingWarningSeconds)
+            if (controller.speedBoostSecondsRemaining < boostEndingWarningSeconds)
                 blend *= Mathf.Repeat(Time.time * 8f, 1f) < 0.5f ? 0f : 1f;
-            finalColor = Color.Lerp(baseBodyColor, JuiceFx.SpeedColor, blend);
+            finalColor = Color.Lerp(baseBodyColor, JuiceFx.speedColor, blend);
         }
         if (flashSecondsLeft > 0f)
         {
@@ -163,45 +124,27 @@ public class PlayerJuice : MonoBehaviour
             finalColor = Color.Lerp(finalColor, flashColor, Mathf.Clamp01(flashSecondsLeft / flashTotalSeconds));
         }
         bodyMaterial.color = finalColor;
-
-        UpdateSquash();
     }
 
-    void UpdateSquash()
-    {
-        if (squashRoot == null) return;
-        float dt = Mathf.Min(Time.unscaledDeltaTime, 0.05f);
-        squashVelocity += (-squashSpring * squash - squashDamping * squashVelocity) * dt;
-        squash = Mathf.Clamp(squash + squashVelocity * dt, -0.35f, 0.35f);
-
-        float runBob = 0f;
-        if (controller.IsGrounded)
-            runBob = Mathf.Sin(Time.time * runBobFrequency) * runBobAmount * Mathf.Clamp01(controller.FlatSpeed / runBobFullSpeed);
-
-        float height = 1f + squash + runBob;
-        float width = 1f / Mathf.Sqrt(height);
-        squashRoot.localScale = new Vector3(width, height, width);
-    }
-
-    void StartBodyFlash(Color color, float seconds)
+    void startBodyFlash(Color color, float seconds)
     {
         flashColor = color;
         flashTotalSeconds = Mathf.Max(0.05f, seconds);
         flashSecondsLeft = flashTotalSeconds;
     }
 
-    static void ShakeCamera(float seconds, float magnitude)
+    static void shakeCamera(float seconds, float magnitude)
     {
-        if (CameraShake.Instance != null) CameraShake.Instance.Shake(seconds, magnitude);
+        if (CameraShake.instance != null) CameraShake.instance.shake(seconds, magnitude);
     }
 
-    IEnumerator HitStopRoutine(float seconds)
+    IEnumerator hitStopRoutine(float seconds)
     {
-        if (seconds <= 0f || IsGameFinished()) yield break;
+        if (seconds <= 0f || isGameFinished() || PauseMenu.isPaused) yield break;
         Time.timeScale = 0.05f;
         yield return new WaitForSecondsRealtime(seconds);
-        Time.timeScale = IsGameFinished() ? 0f : 1f;
+        Time.timeScale = isGameFinished() || PauseMenu.isPaused ? 0f : 1f;
     }
 
-    static bool IsGameFinished() => GameManager.Instance != null && GameManager.Instance.IsFinished;
+    static bool isGameFinished() => GameManager.instance != null && GameManager.instance.isFinished;
 }

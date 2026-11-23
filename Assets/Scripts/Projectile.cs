@@ -11,7 +11,7 @@ public class Projectile : MonoBehaviour
     float age;
     bool launched;
 
-    public void Launch(Vector3 aimDirection, float bulletSpeed)
+    public void launch(Vector3 aimDirection, float bulletSpeed)
     {
         direction = aimDirection.normalized;
         speed = bulletSpeed;
@@ -23,7 +23,7 @@ public class Projectile : MonoBehaviour
         if (!launched) return;
         age += Time.deltaTime;
         transform.position += direction * (speed * Time.deltaTime);
-        if (age >= lifetimeSeconds) Pop();
+        if (age >= lifetimeSeconds) pop();
     }
 
     void OnTriggerEnter(Collider other)
@@ -31,21 +31,21 @@ public class Projectile : MonoBehaviour
         if (!launched) return;
         if (other.CompareTag("Player"))
         {
-            if (other.TryGetComponent(out Health health) && health.TakeDamage(damage))
+            if (other.TryGetComponent(out Health health) && health.takeDamage(damage))
             {
                 Vector3 flat = new Vector3(direction.x, 0f, direction.z).normalized;
-                if (other.TryGetComponent(out PlayerController controller)) controller.Knockback(flat * knockback, knockTime);
+                if (other.TryGetComponent(out PlayerController controller)) controller.knockback(flat * knockback, knockTime);
             }
-            Pop();
+            pop();
             return;
         }
         if (other.isTrigger || other.GetComponentInParent<Turret>() != null) return;
-        Pop();
+        pop();
     }
 
-    void Pop()
+    void pop()
     {
-        JuiceFx.Burst(transform.position, JuiceFx.DamageColor, 8, 3f, 0.1f, 0.3f);
+        JuiceFx.burst(transform.position, JuiceFx.damageColor, 8, 3f, 0.1f, 0.3f);
         Destroy(gameObject);
     }
 }
