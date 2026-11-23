@@ -1,40 +1,47 @@
-# CS464 Assignment 03 · Muhammad Hamza · BSSE23001
+# CS464 Assignment 04 · Muhammad Hamza · BSSE23001
 
-- **Video:** https://drive.google.com/file/d/1m73caQzogv-LlhLUoE03czYL9nBzNtbO/view?usp=sharing
-- **Started from:** I have reused most of the scripts and prefabs from my own Lab 06, because it already had the player, hazards, pickups and GameManager I needed. I built the five new levels on top of it. Many of the scripts are here but not used, they are just remained here so as no other script get failed.
-- **Controls:** Arrow keys to move, Space to jump
-- **To win a level:** Collect the target number of coins (8 / 7 / 7 / 8 / 9 for Levels 1–5), then reach the goal. Losing all lives shows the lose panel.
+**Video:** https://drive.google.com/file/d/1-CtwnZGskiyIDmn3EH4E0jbZpNK7_twq/view?usp=sharing
 
-## Levels
+<p>
+<img src="Docs/a4/hud-16x9.png" width="320" alt="The HUD at 16:9">
+<img src="Docs/a4/hud-4x3.png" width="320" alt="The HUD at 4:3">
+<img src="Docs/a4/hud-gray.png" width="320" alt="The HUD in grayscale">
+</p>
 
-| Level   | Screenshot                                  | New idea                                             | Combined with                                 |
-| ------- | ------------------------------------------- | ---------------------------------------------------- | --------------------------------------------- |
-| Level01 | <img src="Docs/a3/level01.png" width="320"> | Coins, goal and bounce pad (nothing hurts)           | Nothing (intro level)                         |
-| Level02 | <img src="Docs/a3/level02.png" width="320"> | Spikes, hearts, pit with optional risky plank detour | Coins, goal, checkpoints (pad removed)        |
-| Level03 | <img src="Docs/a3/level03.png" width="320"> | Patrolling guard that chases and gives up            | Spikes, hearts, coins, checkpoint             |
-| Level04 | <img src="Docs/a3/level04.png" width="320"> | Crusher tiles that warn, then strike                 | Bounce pad, spikes, guard                     |
-| Level05 | <img src="Docs/a3/level05.png" width="320"> | Timed speed power-ups to beat a crusher corridor     | Bounce pad, spikes, crushers, ping-pong guard |
+## Settings
 
-## The numbers
+| Part | Setting                      | Value                                           | Why                                                                   |
+| ---- | ---------------------------- | ----------------------------------------------- | --------------------------------------------------------------------- |
+| A    | Harmony · base hue           | split-complementary · 262°                      | violet base; amber (52°) and green (112°) either side of its opposite |
+| A    | Dark · mid · light           | #150E20 · #9E7ADC · #F3EEFC                     | three clear grey steps: 17, 137, 240                                  |
+| A    | Accents                      | #FFD83D · #359D25                               | amber = score and the selected button; green = health                 |
+| A    | Score text on its panel      | 13.57 : 1                                       | solid panel, not the level                                            |
+| A    | Button label on the button   | 5.62 : 1                                        | a dark label; white would be 2.65 : 1                                 |
+| B    | Music · SFX groups, as mixed | −6.0 dB · 0.0 dB                                | music sits under the effects                                          |
+| B    | Slider at 1 · 0.5 · 0.0001   | 0 dB · −6.02 dB · −80 dB                        | dB = Log10(v) × 20; the minimum avoids Log10(0)                       |
+| C    | Goal beacon, in Level 1      | Logarithmic · Min 4 · Max 50                    | a homing cue that swells near the goal                                |
+| C    | Guard hum, in Level 3        | Linear · Min 2 · Max 16                         | silent when no guard is near; warns before the 6 m chase              |
+| C    | AudioListener                | on `playerEarsPrefab`, which follows the player | camera is ~18 m from the ball                                         |
+| D    | unlocked                     | int · default 1                                 |                                                                       |
+| D    | best1 … best5                | float · HasKey first                            |                                                                       |
+| D    | musicVolume (and sfxVolume)  | float · default 0.5 (1)                         |                                                                       |
 
-| Number            | Value                       | Why this value                                                                                                                                                                                                     |
-| ----------------- | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Patrol speed      | 4.5 m/s                     | Slightly slower than my run speed, so the guard can be dodged in time.                                                                                                                                             |
-| Chase range       | 6 m (give-up 9 m)           | Guard notices only when we are close, but we can grab edge coins safely. The longer give-up range stops it flickering between chase and patrol. Chase speed is 3.5 m/s, balanced by the damping imposed on player. |
-| Knockback         | 6, ForceMode.VelocityChange | Throws the player about 2 m away from the hazard in play, enough to clear it without feeling unfair.                                                                                                               |
-| I-frames          | 1 s                         | Long enough to get clear after a hit, and means only one heart per second if we stand in a hazard.                                                                                                                 |
-| Power-up duration | 5 s (1.6× speed)            | Long enough to sprint through the crusher corridor, but too short to use for the whole level.                                                                                                                      |
+## Answers
 
-## Short answers
+1. **What `Time.timeScale = 0` stops in my game, and what it doesn't:** It freezes everything that is running on the scaled time like physics engine, the clock, the respawn timer. It doesn't stop `Update`, or anything running on unscaled time like the panel pop-in, the loading bar etc. It doesn't stop audio either, which is why pausing also sets `AudioListener.pause`; the music and menu clicks simply ignore it.
 
-**1. Why does a trigger need a Rigidbody on at least one of the two objects?**
-Physics Engine only sends trigger events for pairs that include a Rigidbody. Two plain static colliders never move relative to the physics system, so no `OnTriggerEnter` is raised. One Rigidbody is must.
+2. **What survives a LoadScene in my game, and how:** `SfxPlayer` and `PersistentMusic` survive through `DontDestroyOnLoad`, with a singleton check so a later copy destroys itself. Unlocks, best times and volumes are in PlayerPrefs saved on the disk. `Time.timeScale`, `AudioListener.pause` and `PauseMenu.IsPaused` survive as statics, so `Resume()` and the loader reset them before every load. The HUD, loader and `GameManager` are rebuilt each time.
 
-**2. Which ForceMode do your knockback and your Part A force use, and why each?**
-Knockback uses `ForceMode.VelocityChange` which is an abrupt change of velocity that ignores mass, so every hit throws the player the same distance. The Part A force (bounce pad launch) uses `ForceMode.Impulse` because for bounce we need a sudden push for the long jump.
+3. **Why every PlayerPrefs read in my game has a default:** A missing key returns 0, which is wrong everywhere here. `unlocked` would be 0, so no level opens. A volume would be 0, and Log10(0) is minus infinity which represents silence. A best time of 0 would look like a perfect run that nothing could beat. So `unlocked` defaults to 1, volumes to 0.5 and 1, and best times check `HasKey` first.
 
-**3. What does your code do when a second power-up is picked up while one is running?**
-It refreshes: the timer is reset to the full 5 s instead of stacking. The speed multiplier is not applied twice, so the speed stays at 1.6× and returns to the normal value once when the timer ends.
+4. **An exception a forgotten unsubscribe would throw, and why mine can't:** If `HealthBar` stayed subscribed to `Health.Damaged` after the HUD was destroyed, the next hit would call a destroyed object which results in a `MissingReferenceException`. A static event would make it worse, surviving every load. Mine can't, because every `+=` in `OnEnable` has a `-=` in `OnDisable`, which runs when a scene unloads, and the events belong to a `Health` that dies with its scene.
 
-**4. Why can `==` fail as an arrival check, and when does it work?**
-Positions are floats and a moving object rarely lands on the exact target value because of rounding and frame-sized steps, so it can overshoot or never match.
+## Credits
+
+- "Wallpaper" Kevin MacLeod (incompetech.com) CC BY 4.0
+- "Monkeys Spinning Monkeys" Kevin MacLeod (incompetech.com) CC BY 4.0
+- "Pixel Peeker Polka - faster" Kevin MacLeod (incompetech.com) CC BY 4.0
+- "Sneaky Snitch" Kevin MacLeod (incompetech.com) CC BY 4.0
+- "Volatile Reaction" Kevin MacLeod (incompetech.com) CC BY 4.0
+- "Voxel Revolution" Kevin MacLeod (incompetech.com) CC BY 4.0
+- Sound effects and the two 3D hums are collected from pixabay, those are free to download.
